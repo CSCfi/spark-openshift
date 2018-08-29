@@ -44,3 +44,9 @@ Listed below are some of the variables that should be changed.
 * oc new-project <project-name>
 * Change the variables
 * oc process -f spark-template.yml | oc apply -f -
+  
+### Deleting
+
+* oc delete dc --all
+* oc delete configmap --all
+* You might also want to delete the secret required by nginx for perform auth, if needed
