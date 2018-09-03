@@ -47,6 +47,7 @@ Listed below are some of the variables that should be changed.
   
 ### Deleting
 
-* oc delete dc --all
-* oc delete configmap --all
-* You might also want to delete the secret required by nginx for perform auth, if needed
+* oc delete all -l app=<CLUSTER_NAME>-spark
+* oc delete configmap -l app=<CLUSTER_NAME>-spark
+* oc delete secret -l app=<CLUSTER_NAME>-spark
+* You might also want to delete the persistent volume created by the setup by oc delete pvc -l app=<CLUSTER_NAME>-spark
