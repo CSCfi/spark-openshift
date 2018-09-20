@@ -20,22 +20,34 @@ Listed below are some of the variables that should be changed.
 
 **Please NOTE : The values for the CPU and Memory should only be changed (to avoid errors) after checking the project quota allocated to your Openshift project.** You should increase or request the admins to increase it for you, if needed.
 
+#### Mandatory Required Values:
 - **Cluster Name**: Unique identifier for your cluster
+- **Username**: Username for authenticating and logging into your Spark cluster and Jupyter (Recommended: create a new username, don't use any existing one)
+- **Password**: Password for authenticating and logging into your Spark cluster and Jupyter (Recommended: create a new password, don't use any existing one)
+- **Worker Replicas**: Number of workers to have (Default: 4)
+
+- **Storage Size**: Persistent storage volume size (Default: 1Gi)
+
+#### Optional Required Values:
+- **Enable Jupyter Lab**: Specify whether if you want to use Jupyter Lab instead of the default Jupyter Notebook (Default: false) 
 - **Master CPU (Request)**: Number of cores for the master node of the cluster
 - **Master Memory (Request)**: Memory for the master node of the cluster
-- **Worker Replicas**: Number of workers to have (Default: 4)
 - **Worker CPU (Request)**: Number of cores for each worker of the cluster (Default: 2)
 - **Worker Memory (Request)**: Memory of each worker of the cluster (Default: 2G)
 
-- LIMITS?
+- **Executor Default Cores**: Default value for Spark Executor Cores (See official Spark documention for more) (Default: 2)
+- **Executor Default Memory**: Default value for Spark Executor Memory (**Should always be less than the Worker memory!**) (Default: 3G)
 
 - **Driver CPU (Request)**: Number of cores for the driver (Jupyter Notebook)
 - **Driver Memory (Request)**: Memory of the driver (Jupyter Notebook)
-- **htpasswd String**: A string made up of a username and a password for logging in to the Spark UI and Jupyter Notebook (*To get the string: use httpd-tools package and then run the following command: **htpasswd -n any_username***) (Default username: demo, password: demo, and thus the generated string: demo:$apr1$2dqlKdHU$/XC8SjRtPXWwiM6qwR5jF/ )
-- **Application Hostname Suffix**: The exposed hostname suffix that will be used to create routes for Spark UI and Jupyter Notebook
-- **Storage Size**: Persistent storage volume size (Default ??)
 
-- JUPYTER_LAB ?
+#### Do not change the following variables, unless you know what you're doing
+- **Master Image**: Docker Image for the Master
+- **Worker Image**: Docker Image for the Worker 
+- **Driver Image**: Docker Image for the Driver 
+- **Application Hostname Suffix**: The exposed hostname suffix that will be used to create routes for Spark UI and Jupyter Notebook
+
+
 
 ## If running through the Command line:
 
