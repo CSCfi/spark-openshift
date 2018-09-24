@@ -47,6 +47,7 @@ Listed below are some of the variables that should be changed.
 - **Driver Image**: Docker Image for the Driver 
 - **Application Hostname Suffix**: The exposed hostname suffix that will be used to create routes for Spark UI and Jupyter Notebook
 
+*NOTE: The template assumes that the request and the limits are same for all the containers. If you wish to have different limits, it's recommended to edit the template*
 
 
 ## If running through the Command line:
