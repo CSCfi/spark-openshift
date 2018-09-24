@@ -1,0 +1,545 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  app: ${CLUSTER_NAME}-spark
+  template: spark
+message: |-
+  The following service(s) have been created in your project: Spark master, Spark master UI, Jupyter
+
+metadata:
+  annotations:
+    description: Deploys Apache Spark cluster with Jupyter Notebook/Lab.
+      For more information regarding the usage of this setup (including information of different variables), see - https://github.com/CSCfi/spark-openshift
+
+
+      By default, the setup deploys a spark cluster with 4 Workers, 1 Master and 1 Jupyter pod. Spark code ran via Jupyter notebook/lab automatically runs on the cluster.
+      The configuration for the worker, master and jupyter pods can be changed according to the Openshift Quota(Limit Range).
+      To get more quota, you should contact Openshift admins.
+
+
+      WARNING- This deployment setup is still in the experimental stage.
+    iconClass: icon-hadoop
+    openshift.io/display-name: Apache Spark
+    openshift.io/documentation-url: https://github.com/CSCfi/spark-openshift
+    openshift.io/support-url: https://www.csc.fi/contact-info
+    openshift.io/long-description: Apache Spark is a popular framework for processing 
+      large amounts of data, see - https://spark.apache.org
+      Jupyter is a web based application which allows you to write python code in a browser, see - https://jupyter.org
+      To learn more about Spark configurations, see - https://spark.apache.org/docs/latest/configuration.html
+      To learn Spark programming, see - https://spark.apache.org/docs/2.2.0/rdd-programming-guide.html
+    openshift.io/provider-display-name: CSC
+    tags: spark, jupyter, python
+    template.openshift.io/bindable: "false"
+  name: apache-spark
+
+objects:
+- apiVersion: "v1"
+  kind: "PersistentVolumeClaim"
+  metadata:
+    name: ${CLUSTER_NAME}-pvc
+  spec:
+    accessModes:
+      - "ReadWriteMany"
+    resources:
+      requests:
+        storage: "2Gi"
+
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ${CLUSTER_NAME}-secret
+  type: Opaque
+  stringData:
+    secret.env: |-
+      USER=${USERNAME}
+      PASS=${PASSWORD}
+
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: ${CLUSTER_NAME}-nginx-config-spark
+  data:
+    default.conf: |
+      upstream node {
+        server localhost:8080;
+      }
+
+      server {
+          server_name             _;
+          listen                  9001;
+
+          location / {
+              proxy_set_header X-Real-IP \$remote_addr;
+              proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+              proxy_set_header Host ${CLUSTER_NAME}-spark.${APPLICATION_DOMAIN_SUFFIX};
+              proxy_pass http://node;
+              proxy_redirect off;
+              port_in_redirect off;
+              auth_basic "Pebbles - Spark UI Login";
+              auth_basic_user_file /etc/nginx/secrets/passwd;
+          }
+          }
+
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: ${CLUSTER_NAME}-nginx-config-jupyter
+  data:
+    default.conf: |-
+      upstream node {
+        server localhost:8888;
+      }
+      server {
+          server_name             _;
+          listen                  8080;
+          location / {
+              proxy_set_header X-Real-IP \$remote_addr;
+              proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+              proxy_set_header Host ${CLUSTER_NAME}-jupyter.${APPLICATION_DOMAIN_SUFFIX};
+              proxy_http_version    1.1;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "upgrade";
+              proxy_read_timeout    86400;
+              proxy_pass http://node;
+              proxy_redirect off;
+              port_in_redirect off;
+              auth_basic "Pebbles - Jupyter Login";
+              auth_basic_user_file /etc/nginx/secrets/passwd;
+          }
+       }
+
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: ${CLUSTER_NAME}-jupyter-notebook-config
+  data:
+    notebook_config.py: |-
+      # Configuration file for ipython-notebook.
+
+      c = get_config()
+      # ------------------------------------------------------------------------------
+      # NotebookApp configuration
+      # ------------------------------------------------------------------------------
+
+      c.IPKernelApp.pylab = 'inline'
+      c.NotebookApp.ip = '127.0.0.1'
+      c.NotebookApp.open_browser = False
+      c.NotebookApp.port = 8888
+      c.NotebookApp.base_url = '/'
+      c.NotebookApp.trust_xheaders = True
+      c.NotebookApp.tornado_settings = {'static_url_prefix': '/static/'}
+      c.NotebookApp.notebook_dir = '/mnt/${CLUSTER_NAME}-pvc'
+      c.NotebookApp.allow_origin = '*'
+      c.NotebookApp.token = ''
+      c.NotebookApp.password = ''
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ${CLUSTER_NAME}-spark-master
+  spec:
+    ports:
+      - port: 7077
+        targetPort: 7077
+    selector:
+      app: ${CLUSTER_NAME}-spark-master
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ${CLUSTER_NAME}-spark-master-ui
+  spec:
+    ports:
+      - port: 80
+        targetPort: 9001
+    selector:
+      app: ${CLUSTER_NAME}-spark-master
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: ${CLUSTER_NAME}-jupyter-notebook
+  spec:
+    ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: ${CLUSTER_NAME}-jupyter-notebook-service
+    selector:
+      app: ${CLUSTER_NAME}-jupyter-notebook
+
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${CLUSTER_NAME}-spark-master-route
+  spec:
+    host: ${CLUSTER_NAME}-spark.${APPLICATION_DOMAIN_SUFFIX}
+    path: /
+    to:
+      kind: Service
+      name: ${CLUSTER_NAME}-spark-master-ui
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${CLUSTER_NAME}-jupyter-notebook-route
+  spec:
+    host: ${CLUSTER_NAME}-jupyter.${APPLICATION_DOMAIN_SUFFIX}
+    path: /
+    to:
+      kind: Service
+      name: ${CLUSTER_NAME}-jupyter-notebook
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Spark master
+      template.alpha.openshift.io/wait-for-ready: "true"
+    name: ${CLUSTER_NAME}-spark-master
+  spec:
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: ${CLUSTER_NAME}-spark-master
+      spec:
+        volumes:
+          - name: ${CLUSTER_NAME}-nginx-config-vol
+            configMap:
+              name: ${CLUSTER_NAME}-nginx-config-spark
+              items:
+              - key: default.conf
+                path: default.conf
+          - name: ${CLUSTER_NAME}-secret-vol
+            secret:
+              secretName: ${CLUSTER_NAME}-secret
+          - name: ${CLUSTER_NAME}-htpasswd-vol
+            emptyDir: {}
+          - name: ${CLUSTER_NAME}-vol
+            persistentVolumeClaim:
+              claimName: ${CLUSTER_NAME}-pvc
+        initContainers:
+        - image: apurva3000/alpine-htpasswd
+          command: ["/bin/sh","-c","source /tmp/secret-env/secret.env && htpasswd -bc /tmp/secret-file/passwd $USER $PASS"]
+          name: htpasswd-generator
+          volumeMounts:
+            - name: ${CLUSTER_NAME}-htpasswd-vol
+              mountPath: "/tmp/secret-file"
+            - name: ${CLUSTER_NAME}-secret-vol
+              mountPath: "/tmp/secret-env"
+        - name: busybox
+          image: busybox:1
+          args:
+            - "/bin/mkdir"
+            - "-p"
+            - "/mnt/${CLUSTER_NAME}-pvc/.tools/${CLUSTER_NAME}/master"
+          volumeMounts:
+            - name: ${CLUSTER_NAME}-vol
+              mountPath: /mnt/${CLUSTER_NAME}-pvc
+        containers:
+          - name: proxy-rewriter
+            image: rlaurika/openshift-nginx
+            imagePullPolicy: Always
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 300m
+                memory: 512Mi
+            ports:
+              - containerPort: 9001
+            volumeMounts:
+              - name: ${CLUSTER_NAME}-nginx-config-vol
+                mountPath: /etc/nginx/conf.d
+              - name: ${CLUSTER_NAME}-htpasswd-vol
+                mountPath: /etc/nginx/secrets
+          - name: spark-master
+            image: ${MASTER_IMAGE}
+            imagePullPolicy: Always
+            ports:
+              - containerPort: 7077
+              - containerPort: 8080
+            livenessProbe:
+              httpGet:
+                path: /
+                port: 8080
+              initialDelaySeconds: 30
+              timeoutSeconds: 30
+            resources:
+              requests:
+                  cpu: ${MASTER_CPU}
+                  memory: ${MASTER_MEMORY}
+              limits:
+                  cpu: ${MASTER_CPU}
+                  memory: ${MASTER_MEMORY}
+            env:
+              - name: START_COMMAND
+                value: "/usr/local/bin/start-master.sh"
+              - name: SPARK_PUBLIC_DNS
+                value: ${CLUSTER_NAME}-spark.${APPLICATION_DOMAIN_SUFFIX}
+              - name: SPARK_RECOVERY_DIR
+                value: /mnt/${CLUSTER_NAME}-pvc/.tools/${CLUSTER_NAME}/master
+            volumeMounts:
+            - name: ${CLUSTER_NAME}-vol
+              mountPath: /mnt/${CLUSTER_NAME}-pvc
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: ${CLUSTER_NAME}-spark-worker
+  spec:
+    replicas: ${WORKER_REPLICAS}
+    template:
+      metadata:
+        annotations:
+          description: Spark Worker
+          template.alpha.openshift.io/wait-for-ready: "true"
+        labels:
+          app: ${CLUSTER_NAME}-spark-worker
+      spec:
+        volumes:
+          - name: ${CLUSTER_NAME}-vol
+            persistentVolumeClaim:
+              claimName: ${CLUSTER_NAME}-pvc
+        containers:
+          - name: spark-worker
+            image: ${WORKER_IMAGE}
+            imagePullPolicy: Always
+            env:
+              - name: SPARK_WORKER_MEMORY
+                value: "${WORKER_MEMORY}"
+              - name: SPARK_WORKER_CORES
+                value: "${WORKER_CPU}"
+              - name: SPARK_MASTER_SERVICE_HOST
+                value: ${CLUSTER_NAME}-spark-master
+              - name: SPARK_WORKER_DIRS
+                value: "/tmp/worker"
+              - name: START_COMMAND
+                value: "/usr/local/bin/start-worker.sh"
+            ports:
+              - containerPort: 8081
+            livenessProbe:
+              httpGet:
+                path: /
+                port: 8081
+              initialDelaySeconds: 30
+              timeoutSeconds: 30
+            resources:
+              requests:
+                  cpu: ${WORKER_CPU}
+                  memory: ${WORKER_MEMORY}
+              limits:
+                  cpu: ${WORKER_CPU}
+                  memory: ${WORKER_MEMORY}
+            volumeMounts:
+            - name: ${CLUSTER_NAME}-vol
+              mountPath: /mnt/${CLUSTER_NAME}-pvc
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Spark jupyter notebook
+      template.alpha.openshift.io/wait-for-ready: "true"
+    name: ${CLUSTER_NAME}-jupyter-notebook
+  spec:
+    strategy:
+      type: Rolling
+    triggers:
+      - type: ConfigChange
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: ${CLUSTER_NAME}-jupyter-notebook
+      spec:
+        volumes:
+          - name: ${CLUSTER_NAME}-nginx-config-vol
+            configMap:
+              name: ${CLUSTER_NAME}-nginx-config-jupyter
+          - name: ${CLUSTER_NAME}-secret-vol
+            secret:
+              secretName: ${CLUSTER_NAME}-secret
+          - name: ${CLUSTER_NAME}-htpasswd-vol
+            emptyDir: {}
+          - name: ${CLUSTER_NAME}-jupyter-notebook-config-vol
+            configMap:
+              name: ${CLUSTER_NAME}-jupyter-notebook-config
+          - name: ${CLUSTER_NAME}-vol
+            persistentVolumeClaim:
+              claimName: ${CLUSTER_NAME}-pvc
+        initContainers:
+        - image: apurva3000/alpine-htpasswd
+          command: ["/bin/sh","-c","source /tmp/secret-env/secret.env && htpasswd -bc /tmp/secret-file/passwd $USER $PASS"]
+          name: htpasswd-generator
+          volumeMounts:
+            - name: ${CLUSTER_NAME}-htpasswd-vol
+              mountPath: "/tmp/secret-file"
+            - name: ${CLUSTER_NAME}-secret-vol
+              mountPath: "/tmp/secret-env"
+        containers:
+          - name: proxy-rewriter
+            image: rlaurika/openshift-nginx
+            imagePullPolicy: Always
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 300m
+                memory: 512Mi
+            ports:
+              - containerPort: 8080
+            volumeMounts:
+              - name: ${CLUSTER_NAME}-nginx-config-vol
+                mountPath: /etc/nginx/conf.d
+              - name: ${CLUSTER_NAME}-htpasswd-vol
+                mountPath: /etc/nginx/secrets
+          - name: jupyter
+            image: ${JUPYTER_IMAGE}
+            env:
+            - name: START_COMMAND
+              value: "/usr/local/bin/start-notebook.sh"
+            - name: JUPYTER_ENABLE_LAB
+              value: "0"
+            - name: SPARK_MASTER_SERVICE
+              value: spark://${CLUSTER_NAME}-spark-master:7077
+            - name: SPARK_OPTS
+              value: --master=spark://${CLUSTER_NAME}-spark-master:7077
+            - name: SPARK_DRIVER_MEMORY   # Need to set these values according to allocated resources
+              value: ${DRIVER_MEMORY}
+            - name: SPARK_DRIVER_CORES
+              value: ${DRIVER_CPU}
+            - name: SPARK_EXECUTOR_CORES_DEFAULT
+              value: ${EXECUTOR_CORES_DEFAULT}
+            - name: SPARK_EXECUTOR_MEMORY_DEFAULT
+              value: ${EXECUTOR_MEMORY_DEFAULT}
+            resources:
+              requests:
+                cpu: ${DRIVER_CPU}
+                memory: ${DRIVER_MEMORY}
+              limits:
+                cpu: ${DRIVER_CPU}
+                memory: ${DRIVER_MEMORY}
+            ports:
+            - containerPort: 8888
+            volumeMounts:
+            - name: ${CLUSTER_NAME}-jupyter-notebook-config-vol
+              mountPath: /home/notebook/.jupyter/notebook_config.py
+              subPath: notebook_config.py
+            - name: ${CLUSTER_NAME}-vol
+              mountPath: /mnt/${CLUSTER_NAME}-pvc
+
+
+parameters:
+- description: Unique identifier for your cluster. Recommended value - your username
+  displayName: Cluster Name
+  name: CLUSTER_NAME
+  required: true
+  value: nandan
+
+- description: Username for logging into Spark UI and Jupyter
+  displayName: Username
+  name: USERNAME
+  required: true
+  value: change_this
+
+- description: Password for logging into Spark UI and Jupyter
+  displayName: Password
+  name: PASSWORD
+  required: true
+  value: change_this
+
+- description: Number of Workers
+  displayName: Worker Replicas
+  name: WORKER_REPLICAS
+  required: true
+  value: '4'
+
+- description: Launch Jupyter Lab instead of Jupyter Notebook
+  displayName: Enable Jupyter Lab
+  name: JUPYTER_ENABLE_LAB
+  required: true
+  value: 'True'
+
+- description: CPU for Master
+  displayName: Master CPU
+  name: MASTER_CPU
+  required: true
+  value: '1'
+
+- description: Memory for Master
+  displayName: Master Memory
+  name: MASTER_MEMORY
+  required: true
+  value: 4G
+
+- description: CPU for Worker
+  displayName: Worker CPU
+  name: WORKER_CPU
+  required: true
+  value: '2'
+
+- description: Memory for Worker
+  displayName: Worker Memory
+  name: WORKER_MEMORY
+  required: true
+  value: 4G
+
+- description: Default value for Spark Executor Cores
+  displayName: Executor Default Cores
+  name: EXECUTOR_CORES_DEFAULT
+  required: true
+  value: '2'
+
+- description: Default value for Spark Executor Memory (Should always be less than the Worker memory!)
+  displayName: Executor Default Memory
+  name: EXECUTOR_MEMORY_DEFAULT
+  required: true
+  value: 3G
+
+- description: CPU for Driver(Jupyter)
+  displayName: Driver CPU (Request)
+  name: DRIVER_CPU
+  required: true
+  value: '1'
+
+- description: Memory for Driver(Jupyter)
+  displayName: Driver Memory (Request)
+  name: DRIVER_MEMORY
+  required: true
+  value: 4G
+
+- description: Docker Image for the Master
+  displayName: Master Image
+  name: MASTER_IMAGE
+  required: true
+  value: apurva3000/spark-jupyter-openshift:20180905
+
+- description: Docker Image for the Worker
+  displayName: Worker Image
+  name: WORKER_IMAGE
+  required: true
+  value: apurva3000/spark-jupyter-openshift:20180905
+
+- description: Docker Image for the Jupyter (Driver)
+  displayName: Worker Image
+  name: JUPYTER_IMAGE
+  required: true
+  value: apurva3000/spark-jupyter-openshift:20180905
+
+- description: The exposed hostname suffix that will be used to create routes for Spark UI and Jupyter Notebook
+  displayName: Application Hostname Suffix
+  name: APPLICATION_DOMAIN_SUFFIX
+  value: rahtiapp.fi
+
+
