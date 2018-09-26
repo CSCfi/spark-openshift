@@ -4,7 +4,10 @@ labels:
   app: spark
   template: spark
 message: |-
-  The following service(s) have been created in your project: Spark master, Spark master UI, Jupyter
+  The following components have been scheduled for creation in your project: Spark master, Spark master UI, Jupyter
+  Go to project overview -> once the creation of all the components are finished, use the following links -
+  To access Jupyter: ${CLUSTER_NAME}-jupyter.${APPLICATION_DOMAIN_SUFFIX}
+  To access Spark UI: ${CLUSTER_NAME}-spark.${APPLICATION_DOMAIN_SUFFIX}
 
 metadata:
   annotations:
