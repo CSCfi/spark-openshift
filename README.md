@@ -3,16 +3,13 @@ Run Apache Spark on Openshift
 
 ## Quickstart:
 
-The template provisions a Spark cluster based on the configuration on Openshift. Make sure, you run this in a new openshift project.
+The template provisions a Spark cluster based on the configuration on Openshift. 
+**NOTE: Make sure, you create a new openshift project in order to run this. It is also recommended that you have only one cluster per openshift project**
 
 There are 3 deployments created - 
 1. **Spark Master**: Serves as the master of the cluster and runs Spark UI
 2. **Spark Worker**: Runs worker instances in the cluster
 3. **Jupyter Notebook**: Serves as the Spark Driver, where one writes the code and submits it to the master
-
-
-### Requirements: 
-- apache-utils or httpd-tools package (yum install httpd-tools)
 
 ### Variables:
 
@@ -60,7 +57,7 @@ Listed below are some of the variables that should be changed.
   
 ### Deleting
 
-* oc delete all -l app=<CLUSTER_NAME>-spark
-* oc delete configmap -l app=<CLUSTER_NAME>-spark
-* oc delete secret -l app=<CLUSTER_NAME>-spark
-* You might also want to delete the persistent volume created by the setup by oc delete pvc -l app=<CLUSTER_NAME>-spark
+* oc delete all -l app=spark
+* oc delete configmap -l app=spark
+* oc delete secret -l app=spark
+* You might also want to delete the persistent volume created by the setup by oc delete pvc -l app=spark
