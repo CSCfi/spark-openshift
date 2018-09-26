@@ -1,7 +1,7 @@
 apiVersion: template.openshift.io/v1
 kind: Template
 labels:
-  app: ${CLUSTER_NAME}-spark
+  app: spark
   template: spark
 message: |-
   The following service(s) have been created in your project: Spark master, Spark master UI, Jupyter
@@ -445,19 +445,16 @@ parameters:
   displayName: Cluster Name
   name: CLUSTER_NAME
   required: true
-  value: nandan
 
 - description: Username for logging into Spark UI and Jupyter
   displayName: Username
   name: USERNAME
   required: true
-  value: change_this
 
 - description: Password for logging into Spark UI and Jupyter
   displayName: Password
   name: PASSWORD
   required: true
-  value: change_this
 
 - description: Number of Workers
   displayName: Worker Replicas
