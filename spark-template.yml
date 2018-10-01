@@ -508,13 +508,13 @@ parameters:
   value: 3G
 
 - description: CPU for Driver(Jupyter)
-  displayName: Driver CPU (Request)
+  displayName: Driver CPU
   name: DRIVER_CPU
   required: true
   value: '1'
 
 - description: Memory for Driver(Jupyter)
-  displayName: Driver Memory (Request)
+  displayName: Driver Memory
   name: DRIVER_MEMORY
   required: true
   value: 4G

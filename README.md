@@ -1,5 +1,5 @@
 # spark-openshift
-Run Apache Spark on Openshift
+Run Apache Spark on Openshift. Based on https://github.com/Uninett/helm-charts
 
 ## Quickstart:
 
@@ -27,16 +27,16 @@ Listed below are some of the variables that should be changed.
 
 #### Optional Required Values:
 - **Enable Jupyter Lab**: Specify whether if you want to use Jupyter Lab instead of the default Jupyter Notebook (Default: false) 
-- **Master CPU (Request)**: Number of cores for the master node of the cluster
-- **Master Memory (Request)**: Memory for the master node of the cluster
-- **Worker CPU (Request)**: Number of cores for each worker of the cluster (Default: 2)
-- **Worker Memory (Request)**: Memory of each worker of the cluster (Default: 2G)
+- **Master CPU**: Number of cores for the master node of the cluster
+- **Master Memory**: Memory for the master node of the cluster
+- **Worker CPU**: Number of cores for each worker of the cluster (Default: 2)
+- **Worker Memory**: Memory of each worker of the cluster (Default: 2G)
 
 - **Executor Default Cores**: Default value for Spark Executor Cores (See official Spark documention for more) (Default: 2)
 - **Executor Default Memory**: Default value for Spark Executor Memory (**Should always be less than the Worker memory!**) (Default: 3G)
 
-- **Driver CPU (Request)**: Number of cores for the driver (Jupyter Notebook)
-- **Driver Memory (Request)**: Memory of the driver (Jupyter Notebook)
+- **Driver CPU**: Number of cores for the driver (Jupyter Notebook)
+- **Driver Memory**: Memory of the driver (Jupyter Notebook)
 
 #### Do not change the following variables, unless you know what you're doing
 - **Master Image**: Docker Image for the Master
