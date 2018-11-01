@@ -18,6 +18,7 @@ RUN chgrp root /usr/local/bin/fix-username-and-start.sh \
 
 ADD start-notebook.sh /usr/local/bin/
 ADD hadoop-openstack-3.0.0.jar /opt/jars/hadoop-os.jar
-ADD hadoop-aws-3.1.1.jar /opt/jars/hadoop-aws.jar
+ADD hadoop-aws-2.7.3.jar /opt/jars/hadoop-aws.jar
+ADD aws-java-sdk-1.7.4.jar /opt/jars/aws-java-sdk.jar
 
 CMD ["/usr/local/bin/fix-username-and-start.sh"]
