@@ -45,7 +45,7 @@ objects:
       - "ReadWriteMany"
     resources:
       requests:
-        storage: "2Gi"
+        storage: ${STORAGE_SIZE}
 
 - apiVersion: v1
   kind: Secret
@@ -464,6 +464,12 @@ parameters:
   name: WORKER_REPLICAS
   required: true
   value: '4'
+
+- description: Persistent Storage Size
+  displayName: Storage Size
+  name: STORAGE_SIZE
+  required: true
+  value: '10Gi'
 
 - description: Launch Jupyter Lab instead of Jupyter Notebook
   displayName: Enable Jupyter Lab
