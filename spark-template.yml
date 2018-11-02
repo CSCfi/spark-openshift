@@ -449,12 +449,12 @@ parameters:
   name: CLUSTER_NAME
   required: true
 
-- description: Username for logging into Spark UI and Jupyter
+- description: Create a new username for logging into Spark UI and Jupyter
   displayName: Username
   name: USERNAME
   required: true
 
-- description: Password for logging into Spark UI and Jupyter
+- description: Create a new password for logging into Spark UI and Jupyter
   displayName: Password
   name: PASSWORD
   required: true
