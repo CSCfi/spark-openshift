@@ -2,6 +2,8 @@ FROM quay.io/uninett/jupyter-spark:20180901-0c7a087
 
 MAINTAINER Apurva Nandan <apurva.nandan@csc.fi>
 
+RUN pip install virtualenv
+
 USER root
 
 RUN mkdir /tmp/worker \
