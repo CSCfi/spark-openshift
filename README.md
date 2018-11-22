@@ -6,6 +6,8 @@ Run Apache Spark on Openshift. Based on https://github.com/Uninett/helm-charts
 The template provisions a Spark cluster based on the configuration on Openshift. 
 **NOTE: Make sure, you create a new openshift project in order to run this. It is also recommended that you have only one cluster per openshift project**
 
+*If you are looking for instructions on how to install custom spark libraries on top of your spark cluster, [click here](https://github.com/CSCfi/spark-openshift/blob/master/installing_libraries.md)*
+
 There are 3 deployments created - 
 1. **Spark Master**: Serves as the master of the cluster and runs Spark UI
 2. **Spark Worker**: Runs worker instances in the cluster
@@ -23,14 +25,14 @@ Listed below are some of the variables that should be changed.
 - **Password**: Password for authenticating and logging into your Spark cluster and Jupyter (Recommended: create a new password, don't use any existing one)
 - **Worker Replicas**: Number of workers to have (Default: 4)
 
-- **Storage Size**: Persistent storage volume size (Default: 1Gi)
+- **Storage Size**: Persistent storage volume size (Default: 10Gi)
 
 #### Optional Required Values:
 - **Enable Jupyter Lab**: Specify whether if you want to use Jupyter Lab instead of the default Jupyter Notebook (Default: false) 
 - **Master CPU**: Number of cores for the master node of the cluster
 - **Master Memory**: Memory for the master node of the cluster
 - **Worker CPU**: Number of cores for each worker of the cluster (Default: 2)
-- **Worker Memory**: Memory of each worker of the cluster (Default: 2G)
+- **Worker Memory**: Memory of each worker of the cluster (Default: 4G)
 
 - **Executor Default Cores**: Default value for Spark Executor Cores (See official Spark documention for more) (Default: 2)
 - **Executor Default Memory**: Default value for Spark Executor Memory (**Should always be less than the Worker memory!**) (Default: 3G)
