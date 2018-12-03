@@ -63,3 +63,9 @@ Listed below are some of the variables that should be changed.
 * oc delete configmap -l app=spark
 * oc delete secret -l app=spark
 * You might also want to delete the persistent volume created by the setup by oc delete pvc -l app=spark
+
+### Adding more storage from OpenShift UI
+From OpenShift console
+* open Storage -> Create Storage -> Fill required fields and press Create button.
+* Application -> Deployments -> For each of the items go Configuration tab -> Add Storage -> Fill desired Mount Path ie. **/mnt/data**  -> Type **Volume Name** or leave empty for automatically generated -> press Add.
+Automatic redeployment starts and after repeating above steps to all items, new pvc will be mounted to application.
