@@ -146,7 +146,7 @@ objects:
       - port: 7077
         targetPort: 7077
     selector:
-      app: ${CLUSTER_NAME}-spark-master
+      run: ${CLUSTER_NAME}-spark-master
 
 - apiVersion: v1
   kind: Service
@@ -157,7 +157,7 @@ objects:
       - port: 80
         targetPort: 9001
     selector:
-      app: ${CLUSTER_NAME}-spark-master
+      run: ${CLUSTER_NAME}-spark-master
 
 - apiVersion: v1
   kind: Service
@@ -170,7 +170,7 @@ objects:
       protocol: TCP
       name: ${CLUSTER_NAME}-jupyter-notebook-service
     selector:
-      app: ${CLUSTER_NAME}-jupyter-notebook
+      run: ${CLUSTER_NAME}-jupyter-notebook
 
 - apiVersion: v1
   kind: Route
@@ -213,7 +213,7 @@ objects:
     template:
       metadata:
         labels:
-          app: ${CLUSTER_NAME}-spark-master
+          run: ${CLUSTER_NAME}-spark-master
       spec:
         volumes:
           - name: ${CLUSTER_NAME}-nginx-config-vol
@@ -308,7 +308,7 @@ objects:
           description: Spark Worker
           template.alpha.openshift.io/wait-for-ready: "true"
         labels:
-          app: ${CLUSTER_NAME}-spark-worker
+          run: ${CLUSTER_NAME}-spark-worker
       spec:
         volumes:
           - name: ${CLUSTER_NAME}-vol
@@ -364,7 +364,7 @@ objects:
     template:
       metadata:
         labels:
-          app: ${CLUSTER_NAME}-jupyter-notebook
+          run: ${CLUSTER_NAME}-jupyter-notebook
       spec:
         volumes:
           - name: ${CLUSTER_NAME}-nginx-config-vol
