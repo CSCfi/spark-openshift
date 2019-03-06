@@ -81,7 +81,7 @@ objects:
               auth_basic "Spark UI Login";
               auth_basic_user_file /etc/nginx/secrets/passwd;
           }
-          }
+      }
 
 - apiVersion: v1
   kind: ConfigMap
@@ -110,7 +110,7 @@ objects:
               auth_basic "Jupyter Login";
               auth_basic_user_file /etc/nginx/secrets/passwd;
           }
-       }
+      }
 
 - apiVersion: v1
   kind: ConfigMap
@@ -548,5 +548,3 @@ parameters:
   displayName: Application Hostname Suffix
   name: APPLICATION_DOMAIN_SUFFIX
   value: rahtiapp.fi
-
-
