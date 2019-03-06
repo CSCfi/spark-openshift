@@ -548,5 +548,3 @@ parameters:
   displayName: Application Hostname Suffix
   name: APPLICATION_DOMAIN_SUFFIX
   value: rahtiapp.fi
-
-
