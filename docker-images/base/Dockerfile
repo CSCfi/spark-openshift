@@ -18,6 +18,9 @@ RUN chmod ug+rw /etc/passwd \
 RUN chgrp root /usr/local/bin/fix-username-and-start.sh \
     && chmod 774 /usr/local/bin/fix-username-and-start.sh
 
+RUN chgrp -R root /home/notebook/.cache/pip \
+    && chmod -R 774 /home/notebook/.cache/pip
+
 ADD start-notebook.sh /usr/local/bin/
 ADD hadoop-openstack-3.0.0.jar /opt/jars/hadoop-os.jar
 ADD hadoop-aws-2.7.3.jar /opt/jars/hadoop-aws.jar
