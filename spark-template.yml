@@ -251,7 +251,7 @@ objects:
               mountPath: /mnt/${CLUSTER_NAME}-pvc
         containers:
           - name: proxy-rewriter
-            image: rlaurika/openshift-nginx
+            image: docker-registry.rahti.csc.fi/spark-images/nginx:latest
             imagePullPolicy: Always
             resources:
               requests:
@@ -264,7 +264,7 @@ objects:
               - containerPort: 9001
             volumeMounts:
               - name: ${CLUSTER_NAME}-nginx-config-vol
-                mountPath: /etc/nginx/conf.d
+                mountPath: /opt/bitnami/nginx/conf/server_blocks
               - name: ${CLUSTER_NAME}-htpasswd-vol
                 mountPath: /etc/nginx/secrets
           - name: spark-master
@@ -393,7 +393,7 @@ objects:
               mountPath: "/tmp/secret-env"
         containers:
           - name: proxy-rewriter
-            image: rlaurika/openshift-nginx
+            image: docker-registry.rahti.csc.fi/spark-images/nginx:latest
             imagePullPolicy: Always
             resources:
               requests:
@@ -406,7 +406,7 @@ objects:
               - containerPort: 8080
             volumeMounts:
               - name: ${CLUSTER_NAME}-nginx-config-vol
-                mountPath: /etc/nginx/conf.d
+                mountPath: /opt/bitnami/nginx/conf/server_blocks
               - name: ${CLUSTER_NAME}-htpasswd-vol
                 mountPath: /etc/nginx/secrets
           - name: jupyter
