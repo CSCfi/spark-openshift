@@ -72,11 +72,17 @@ objects:
           }
           location = /auth {
               internal;
-              proxy_pass              ${OAUTH2_URL};
-              proxy_pass_request_body off;
-              proxy_set_header        Content-Length "";
+              #proxy_pass              ${OAUTH2_URL};
+              #proxy_pass_request_body off;
+              #proxy_set_header        Content-Length "";
+              #proxy_set_header        X-Original-URI $request_uri;
+              #proxy_set_header        Authorization $http_Authorization;
+
+              proxy_method            POST;
               proxy_set_header        X-Original-URI $request_uri;
-              proxy_set_header        Authorization $http_Authorization;
+              proxy_set_header        Content-Type "application/x-www-form-urlencoded";
+              proxy_set_body          "token=$http_Authorization&token_hint=access_token";
+              proxy_pass              ${OAUTH2_URL};
           }
       }
 
@@ -108,11 +114,17 @@ objects:
           }
           location = /auth {
               internal;
-              proxy_pass              ${OAUTH2_URL};
-              proxy_pass_request_body off;
-              proxy_set_header        Content-Length "";
+              #proxy_pass              ${OAUTH2_URL};
+              #proxy_pass_request_body off;
+              #proxy_set_header        Content-Length "";
+              #proxy_set_header        X-Original-URI $request_uri;
+              #proxy_set_header        Authorization $http_Authorization;
+              
+              proxy_method            POST;
               proxy_set_header        X-Original-URI $request_uri;
-              proxy_set_header        Authorization $http_Authorization;
+              proxy_set_header        Content-Type "application/x-www-form-urlencoded";
+              proxy_set_body          "token=$http_Authorization&token_hint=access_token";
+              proxy_pass              ${OAUTH2_URL};
           }
       }
 
