@@ -61,28 +61,46 @@ objects:
           server_name             _;
           listen                  9001;
 
-          location / {
-              proxy_set_header X-Real-IP \$remote_addr;
-              proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-              proxy_set_header Host ${CLUSTER_NAME}-spark.${APPLICATION_DOMAIN_SUFFIX};
-              proxy_pass http://node;
-              proxy_redirect off;
-              port_in_redirect off;
-              auth_request /auth;
-          }
-          location = /auth {
-              internal;
 
-              proxy_method            GET;
-              proxy_set_header        X-Original-URI $request_uri;
-              set $token '';
-              set $instance_id '';
-              if ($request_uri ~* ".*\?(.*)&(.*)") {
-              set $token $1;
-              set $instance_id $2;
-              }
-              proxy_pass              https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances/$token/$instance_id;
-          }
+          location / {
+                proxy_set_header X-Real-IP \$remote_addr;
+                proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                proxy_set_header Host pebspark1-spark.rahtiapp.fi;
+                proxy_pass http://node;
+                proxy_redirect off;
+                port_in_redirect off;
+        
+                set $t '';
+                set $i '';
+                if ($request_uri ~* ".*\?.*=(.*)&.*=(.*)") {
+                set $t $1;
+                set $i $2;
+                }
+                add_header TOKEN $t always;
+                add_header INSTANCE_ID "$i" always;
+                add_header URL https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances/$t/$i always;
+        
+                auth_request /auth;
+                }
+        location = /auth {
+                internal;
+        
+                set $token '';
+                set $instance_id '';
+                if ($request_uri ~* ".*\?.*=(.*)&.*=(.*)") {
+                set $token $1;
+                set $instance_id $2;
+                }
+        
+                set $auth_url http://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances/$token/$instance_id;
+                proxy_pass              $auth_url;
+                proxy_pass_request_body off;
+                proxy_set_header        Content-Length "";
+                proxy_set_header        X-Original-URI $request_uri;
+                add_header TEST "test" always;
+        
+        }
+
       }
 - apiVersion: v1
   kind: ConfigMap
