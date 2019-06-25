@@ -73,10 +73,8 @@ objects:
           location = /auth {
               internal;
 
-              proxy_method            POST;
+              proxy_method            GET;
               proxy_set_header        X-Original-URI $request_uri;
-#              proxy_set_header        Content-Type "application/x-www-form-urlencoded";
-#              proxy_set_body          "token=$http_Authorization&token_hint=access_token";
               set $token '';
               set $instance_id '';
               if ($request_uri ~* ".*\?(.*)&(.*)") {
@@ -86,7 +84,6 @@ objects:
               proxy_pass              https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances/$token/$instance_id;
           }
       }
-
 - apiVersion: v1
   kind: ConfigMap
   metadata:
