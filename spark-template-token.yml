@@ -81,6 +81,8 @@ objects:
                 add_header URL https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances/$t/$i always;
         
                 auth_request /auth;
+                auth_request_set $saved_set_cookie $upstream_http_set_cookie;
+                add_header Set-Cookie $saved_set_cookie;
                 }
         location = /auth {
                 internal;
@@ -91,13 +93,13 @@ objects:
                 set $token $1;
                 set $instance_id $2;
                 }
-        
-                set $auth_url http://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances/$token/$instance_id;
+                resolver 193.166.4.25 ipv6=off;
+                resolver_timeout 5s;
+                set $auth_url https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances/$token/$instance_id;
                 proxy_pass              $auth_url;
                 proxy_pass_request_body off;
                 proxy_set_header        Content-Length "";
                 proxy_set_header        X-Original-URI $request_uri;
-                add_header TEST "test" always;
         
         }
 
