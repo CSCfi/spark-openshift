@@ -70,42 +70,24 @@ objects:
                 proxy_redirect off;
                 port_in_redirect off;
         
-                set $t '';
-                set $i '';
-                if ($request_uri ~* ".*\?.*=(.*)&.*=(.*)") {
-                set $t $1;
-                set $i $2;
-                }
-                add_header TOKEN $t always;
-                add_header INSTANCE_ID "$i" always;
-                add_header URL https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances/$t/$i always;
-        
                 auth_request /auth;
-                auth_request_set $saved_set_cookie ORIGINAL_TOKEN=$upstream_http_original_token;
-                auth_request_set $saved_set_cookie1 INSTANCE_ID=$upstream_http_instance_id;
-                add_header Set-Cookie $saved_set_cookie;
-                add_header Set-Cookie $saved_set_cookie1;
+                auth_request_set $saved_set_cookie_token TOKEN=$upstream_http_token;
+                auth_request_set $saved_set_cookie_instance INSTANCE-ID=$upstream_http_instance-id;
+                add_header Set-Cookie $saved_set_cookie_token;
+                add_header Set-Cookie $saved_set_cookie_instance;
                 }
         location = /auth {
                 internal;
         
-                set $token '';
-                set $instance_id '';
-                if ($request_uri ~* ".*\?.*=(.*)&.*=(.*)") {
-                set $token $1;
-                set $instance_id $2;
-                }
                 resolver 193.166.4.25 ipv6=off;
                 resolver_timeout 5s;
-                if ($token ~ ''){
-                set $token $cookie_original_token;
-                set $instance_id $cookie_instance_id;
-                }
-                set $auth_url https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances/$token/$instance_id;
+                set $auth_url https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances;
                 proxy_pass              $auth_url;
                 proxy_pass_request_body off;
                 proxy_set_header        Content-Length "";
                 proxy_set_header        X-Original-URI $request_uri;
+                proxy_set_header	ORIGINAL-TOKEN $cookie_TOKEN
+                proxy_set_header	INSTANCE-ID $cookie_INSTANCE-ID
         
         }
 
