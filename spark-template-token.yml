@@ -69,12 +69,13 @@ objects:
                 proxy_pass http://node;
                 proxy_redirect off;
                 port_in_redirect off;
-        
+       
                 auth_request /auth;
-                auth_request_set $saved_set_cookie_token TOKEN=$upstream_http_token;
-                auth_request_set $saved_set_cookie_instance INSTANCE-ID=$upstream_http_instance-id;
-                add_header Set-Cookie $saved_set_cookie_token;
-                add_header Set-Cookie $saved_set_cookie_instance;
+                auth_request_set $saved_set_cookie_token $upstream_http_token;
+                auth_request_set $saved_set_cookie_instance_id $upstream_http_instance_id;
+
+                add_header Set-Cookie TOKEN=$saved_set_cookie_token;
+                add_header Set-Cookie INSTANCE_ID=$saved_set_cookie_instance_id; 
                 }
         location = /auth {
                 internal;
@@ -86,9 +87,9 @@ objects:
                 proxy_pass_request_body off;
                 proxy_set_header        Content-Length "";
                 proxy_set_header        X-Original-URI $request_uri;
-                proxy_set_header	ORIGINAL-TOKEN $cookie_TOKEN
-                proxy_set_header	INSTANCE-ID $cookie_INSTANCE-ID
-        
+
+                proxy_set_header        ORIGINAL-TOKEN $cookie_TOKEN;
+                proxy_set_header        INSTANCE-ID $cookie_INSTANCE_ID;
         }
 
       }
