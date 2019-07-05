@@ -117,15 +117,31 @@ objects:
               proxy_pass http://node;
               proxy_redirect off;
               port_in_redirect off;
+
               auth_request /auth;
+              auth_request_set $saved_set_cookie_token $upstream_http_token;
+              auth_request_set $saved_set_cookie_instance_id $upstream_http_instance_id;
+
+              add_header Set-Cookie TOKEN=$saved_set_cookie_token;
+              add_header Set-Cookie INSTANCE_ID=$saved_set_cookie_instance_id;
           }
           location = /auth {
-              internal;
-              
-              proxy_method            GET;
-              proxy_set_header        X-Original-URI $request_uri;
+
+                internal;
+
+                resolver 193.166.4.25 ipv6=off;
+                resolver_timeout 5s;
+                set $auth_url https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances;
+                proxy_pass              $auth_url;
+                proxy_pass_request_body off;
+                proxy_set_header        Content-Length "";
+                proxy_set_header        X-Original-URI $request_uri;
+
+                proxy_set_header        ORIGINAL-TOKEN $cookie_TOKEN;
+                proxy_set_header        INSTANCE-ID $cookie_INSTANCE_ID;
+
           }
-      }
+       }
 
 - apiVersion: v1
   kind: ConfigMap
