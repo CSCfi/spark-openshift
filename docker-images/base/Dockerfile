@@ -1,4 +1,4 @@
-FROM quay.io/uninett/jupyter-spark:20180901-0c7a087
+FROM quay.io/uninett/jupyter-spark:20190318-144efc8
 
 MAINTAINER Apurva Nandan <apurva.nandan@csc.fi>
 
