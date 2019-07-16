@@ -531,19 +531,19 @@ parameters:
   displayName: Master Image
   name: MASTER_IMAGE
   required: true
-  value: docker-registry.rahti.csc.fi/spark-images/spark:latest
+  value: docker-registry.rahti.csc.fi/spark-images/spark:2.4
 
 - description: Docker Image for the Worker
   displayName: Worker Image
   name: WORKER_IMAGE
   required: true
-  value: docker-registry.rahti.csc.fi/spark-images/spark:latest
+  value: docker-registry.rahti.csc.fi/spark-images/spark:2.4
 
 - description: Docker Image for the Jupyter (Driver)
   displayName: Worker Image
   name: JUPYTER_IMAGE
   required: true
-  value: docker-registry.rahti.csc.fi/spark-images/spark:latest
+  value: docker-registry.rahti.csc.fi/spark-images/spark:2.4
 
 - description: The exposed hostname suffix that will be used to create routes for Spark UI and Jupyter Notebook
   displayName: Application Hostname Suffix
