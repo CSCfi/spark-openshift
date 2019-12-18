@@ -65,7 +65,7 @@ objects:
           location / {
                 proxy_set_header X-Real-IP \$remote_addr;
                 proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                proxy_set_header Host pebspark1-spark.rahtiapp.fi;
+                proxy_set_header Host ${CLUSTER_NAME}-spark.${APPLICATION_DOMAIN_SUFFIX};
                 proxy_pass http://node;
                 proxy_redirect off;
                 port_in_redirect off;
@@ -82,7 +82,7 @@ objects:
         
                 resolver 193.166.4.25 ipv6=off;
                 resolver_timeout 5s;
-                set $auth_url https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances;
+                set $auth_url ${AUTH_ENDPOINT};
                 proxy_pass              $auth_url;
                 proxy_pass_request_body off;
                 proxy_set_header        Content-Length "";
@@ -131,7 +131,7 @@ objects:
 
                 resolver 193.166.4.25 ipv6=off;
                 resolver_timeout 5s;
-                set $auth_url https://pebbles-api-nandan-dev.rahtiapp.fi/api/v1/authorize_instances;
+                set $auth_url ${AUTH_ENDPOINT};
                 proxy_pass              $auth_url;
                 proxy_pass_request_body off;
                 proxy_set_header        Content-Length "";
@@ -450,6 +450,11 @@ parameters:
   name: CLUSTER_NAME
   required: true
 
+- description: Authorization endpoint which is supposed to be checking the token provided while accessing the services
+  displayName: Authorization Endpoint
+  name: AUTH_ENDPOINT
+  required: true
+
 - description: Number of Workers
   displayName: Worker Replicas
   name: WORKER_REPLICAS
@@ -538,8 +543,3 @@ parameters:
   displayName: Application Hostname Suffix
   name: APPLICATION_DOMAIN_SUFFIX
   value: rahtiapp.fi
-
-- description: OAuth2 authentication server url for Spark UI and Jupyter Notebook logins
-  displayName: OAuth2 authentication server url
-  name: OAUTH2_URL
-
