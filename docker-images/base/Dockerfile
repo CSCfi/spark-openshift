@@ -2,7 +2,10 @@ FROM quay.io/uninett/jupyter-spark:20190318-144efc8
 
 MAINTAINER Apurva Nandan <apurva.nandan@csc.fi>
 
-RUN pip install virtualenv
+RUN pip install virtualenv \
+	&& pip install python-openstackclient \
+	&& pip install s3cmd \
+	&& pip install python-swiftclient
 
 USER root
 
