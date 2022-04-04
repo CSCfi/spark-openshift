@@ -252,7 +252,7 @@ objects:
         containers:
           - name: proxy-rewriter
             image: docker-registry.rahti.csc.fi/spark-images/nginx:latest
-            imagePullPolicy: Always
+            imagePullPolicy: IfNotPresent
             resources:
               requests:
                 cpu: 100m
@@ -269,7 +269,7 @@ objects:
                 mountPath: /etc/nginx/secrets
           - name: spark-master
             image: ${MASTER_IMAGE}
-            imagePullPolicy: Always
+            imagePullPolicy: IfNotPresent
             ports:
               - containerPort: 7077
               - containerPort: 8080
@@ -318,7 +318,7 @@ objects:
         containers:
           - name: spark-worker
             image: ${WORKER_IMAGE}
-            imagePullPolicy: Always
+            imagePullPolicy: IfNotPresent
             env:
               - name: SPARK_WORKER_MEMORY
                 value: "${WORKER_MEMORY}"
@@ -394,7 +394,7 @@ objects:
         containers:
           - name: proxy-rewriter
             image: docker-registry.rahti.csc.fi/spark-images/nginx:latest
-            imagePullPolicy: Always
+            imagePullPolicy: IfNotPresent
             resources:
               requests:
                 cpu: 100m
@@ -411,6 +411,7 @@ objects:
                 mountPath: /etc/nginx/secrets
           - name: jupyter
             image: ${JUPYTER_IMAGE}
+            imagePullPolicy: IfNotPresent
             env:
             - name: START_COMMAND
               value: "/usr/local/bin/start-notebook.sh"
