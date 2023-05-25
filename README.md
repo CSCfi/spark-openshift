@@ -52,17 +52,33 @@ Listed below are some of the variables that should be changed.
 ## If running through the Command line:
 
 * Download the oc client for openshift
-* oc login
-* oc new-project <project-name>
-* Change the variables
-* oc process -f spark-template.yml | oc apply -f -
-  
+* `oc login`
+* `oc new-project <project-name>`
+* `oc process -f spark-template.yml -p CLUSTER_NAME="cluster_name" -p USERNAME="username" -p PASSWORD="password" | oc apply -f -`
+
+### Adding more workers
+By default, the template will deploy 4 workers. If you know that you will need more than 4 at the beginning, you can use this command:  
+```sh
+oc process -f spark-template.yml -p CLUSTER_NAME="cluster_name" -p USERNAME="username" -p PASSWORD="password" -p WORKER_REPLICAS="x"
+```
+
+If after the deployment you need more workers, you can type this command to increase the number of worker pods:  
+```sh
+oc scale dc/<your_deployment_name> --replicas=x
+```
+
+You can list your DeploymentConfig with this command:
+```sh
+oc get dc
+```
+*You can also downscale the number of pods with the command above*
+
 ### Deleting
 
-* oc delete all -l app=spark
-* oc delete configmap -l app=spark
-* oc delete secret -l app=spark
-* You might also want to delete the persistent volume created by the setup by oc delete pvc -l app=spark
+* `oc delete all -l app=spark`
+* `oc delete configmap -l app=spark`
+* `oc delete secret -l app=spark`
+* You might also want to delete the persistent volume created by the setup by typing `oc delete pvc -l app=spark`
 
 ### Adding more storage from OpenShift UI
 From OpenShift console
