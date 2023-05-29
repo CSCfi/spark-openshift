@@ -62,7 +62,7 @@ By default, the template will deploy 4 workers. If you know that you will need m
 oc process -f spark-template.yml -p CLUSTER_NAME="cluster_name" -p USERNAME="username" -p PASSWORD="password" -p WORKER_REPLICAS="x"
 ```
 
-If after the deployment you need more workers, you can type this command to increase the number of worker pods:  
+If after the deployment you need more or less workers, you can type this command to increase/decrease the number of worker pods:  
 ```sh
 oc scale dc/<your_deployment_name> --replicas=x
 ```
@@ -71,7 +71,6 @@ You can list your DeploymentConfig with this command:
 ```sh
 oc get dc
 ```
-*You can also downscale the number of pods with the command above*
 
 ### Deleting
 
